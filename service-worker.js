@@ -22,7 +22,7 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
     ) {
       console.log("Tab updated - Opened a YouTube Short");
       const shortId = getShortId(changeInfo.url);
-      redirectToVideoPlayer(tabId, shortId);
+      historyAwareRedirectToVideoPlayer(tabId, shortId);
     }
   } else {
     console.log("No redirection since extension is disabled");
@@ -48,5 +48,16 @@ function redirectToVideoPlayer(tabId, shortId) {
   console.log("Redirecting to Video Player");
   chrome.tabs.update(tabId, {
     url: "https://www.youtube.com/watch?v=" + shortId,
+  });
+}
+
+function historyAwareRedirectToVideoPlayer(tabId, shortId) {
+  console.log("Redirecting to Video Player with history awareness");
+  chrome.scripting.executeScript({
+    target: { tabId },
+    args: [shortId],
+    func: (shortIdArg) => {
+      window.location.replace(`https://www.youtube.com/watch?v=${shortIdArg}`);
+    },
   });
 }
